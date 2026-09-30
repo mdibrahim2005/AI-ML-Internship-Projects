@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI News Classifier</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #243b55, transparent 40%),
+                radial-gradient(circle at bottom right, #1b2735, transparent 40%),
+                #0f172a;
+            color: #ffffff;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 21px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 230px;
+            resize: vertical;
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #334155;
+            background: #020617;
+            color: white;
+            font-size: 16px;
+            line-height: 1.6;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+        }
+
+        textarea::placeholder {
+            color: #64748b;
+        }
+
+        .counter {
+            display: flex;
+            justify-content: space-between;
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .analyze-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .clear-btn {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+        }
+
+        .clear-btn:hover {
+            background: #334155;
+        }
+
+        .error-box {
+            margin-top: 20px;
+            padding: 15px 18px;
+            border-radius: 12px;
+            background: rgba(127, 29, 29, 0.25);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            color: #fecaca;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #93c5fd;
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #334155;
+            border-top: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-card {
+            margin-top: 25px;
+        }
+
+        .result-title {
+            font-size: 18px;
+            color: #cbd5e1;
+            margin-bottom: 18px;
+        }
+
+        .prediction {
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            background: #020617;
+            border: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        .prediction-result {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .fake {
+            color: #f87171;
+        }
+
+        .real {
+            color: #4ade80;
+        }
+
+        .confidence {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .confidence-level {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #1e293b;
+            color: #facc15;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .explanation {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        .probability {
+            margin-top: 18px;
+        }
+
+        .probability-row {
+            margin-bottom: 18px;
+        }
+
+        .probability-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress {
+            height: 10px;
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 20px;
+        }
+
+        .fake-bar {
+            background: #ef4444;
+        }
+
+        .real-bar {
+            background: #22c55e;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .feature {
+            background: rgba(2, 6, 23, 0.75);
+            border: 1px solid #1e293b;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .feature p {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .disclaimer {
+            margin-top: 25px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(120, 53, 15, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            color: #fcd34d;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 700px) {
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .analyze-btn {
+                width: 100%;
+            }
+
+            .clear-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+
+            <div class="badge">
+                🤖 MACHINE LEARNING PROJECT
+            </div>
+
+            <h1>📰 AI News Classifier</h1>
+
+            <p class="subtitle">
+                Analyze news articles using
+                <strong>TF-IDF</strong> and
+                <strong>Logistic Regression</strong>
+                to classify them as Fake or Real.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2 class="section-title">
+                📝 Enter News Article
+            </h2>
+
+            <p class="description">
+                Paste a news headline or article below and let the
+                machine-learning model analyze it.
+            </p>
+
+            <form method="POST" id="newsForm">
+
+                <textarea
+                    id="newsText"
+                    name="news_text"
+                    placeholder="Write or paste your news content..."
+                >{{ news_text }}</textarea>
+
+                <div class="counter">
+
+                    <span>
+                        Words:
+                        <strong id="wordCount">0</strong>
+                    </span>
+
+                    <span>
+                        Characters:
+                        <strong id="charCount">0</strong>
+                    </span>
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="analyze-btn"
+                        id="analyzeBtn"
+                    >
+                        🔍 Analyze News
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clear-btn"
+                        onclick="clearText()"
+                    >
+                        🗑️ Clear
+                    </button>
+
+                </div>
+
+
+                {% if error_message %}
+
+                <div class="error-box">
+                    ⚠️ {{ error_message }}
+                </div>
+
+                {% endif %}
+
+
+                <div class="loading" id="loading">
+
+                    <div class="spinner"></div>
+
+                    <div>
+                        Analyzing news article...
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        {% if result %}
+
+        <div class="card result-card">
+
+            <div class="result-title">
+                Analysis Result
+            </div>
+
+
+            <div class="prediction">
+
+                {% if result == "FAKE NEWS" %}
+
+                <div class="prediction-result fake">
+                    🚨 FAKE NEWS
+                </div>
+
+                {% else %}
+
+                <div class="prediction-result real">
+                    ✅ REAL NEWS
+                </div>
+
+                {% endif %}
+
+
+                <div class="confidence">
+                    Model Confidence:
+                    <strong>{{ "%.2f"|format(confidence) }}%</strong>
+                </div>
+
+
+                <div class="confidence-level">
+                    📊 {{ confidence_level }}
+                </div>
+
+
+                <p class="explanation">
+                    This indicates how strongly the trained model favors
+                    its predicted class based on the text patterns it
+                    learned from the training data.
+                </p>
+
+            </div>
+
+
+            <div class="probability">
+
+                <div class="probability-row">
+
+                    <div class="probability-label">
+
+                        <span>
+                            🚨 Fake News
+                        </span>
+
+                        <strong>
+                            {{ "%.2f"|format(fake_probability) }}%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar fake-bar"
+                            style="width: {{ fake_probability }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="probability-row">
+
+                    <div class="probability-label">
+
+                        <span>
+                            ✅ Real News
+                        </span>
+
+                        <strong>
+                            {{ "%.2f"|format(real_probability) }}%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar real-bar"
+                            style="width: {{ real_probability }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="features">
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🧠
+                </div>
+
+                <h3>
+                    Machine Learning
+                </h3>
+
+                <p>
+                    Logistic Regression
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    📊
+                </div>
+
+                <h3>
+                    Text Analysis
+                </h3>
+
+                <p>
+                    TF-IDF Vectorization
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    ⚡
+                </div>
+
+                <h3>
+                    Fast Prediction
+                </h3>
+
+                <p>
+                    Real-time classification
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="disclaimer">
+
+            ⚠️ <strong>Important:</strong>
+            This application provides a machine-learning
+            classification based on patterns learned from
+            training data. It does not independently verify
+            whether a news story is factually true or false.
+
+        </div>
+
+
+        <footer>
+
+            AI News Article Classification Project
+            <br>
+            Built with Python • Flask • Scikit-learn
+
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        const newsText = document.getElementById("newsText");
+        const wordCount = document.getElementById("wordCount");
+        const charCount = document.getElementById("charCount");
+        const newsForm = document.getElementById("newsForm");
+        const loading = document.getElementById("loading");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+
+        function updateCounters() {
+
+            const text = newsText.value;
+
+            charCount.textContent = text.length;
+
+            const words = text.trim()
+                ? text.trim().split(/\s+/).length
+                : 0;
+
+            wordCount.textContent = words;
+        }
+
+
+        function clearText() {
+
+            newsText.value = "";
+
+            updateCounters();
+
+            newsText.focus();
+        }
+
+
+        newsText.addEventListener(
+            "input",
+            updateCounters
+        );
+
+
+        newsForm.addEventListener(
+            "submit",
+            function () {
+
+                if (newsText.value.trim().length >= 20) {
+
+                    loading.style.display = "block";
+
+                    analyzeBtn.disabled = true;
+
+                    analyzeBtn.style.opacity = "0.6";
+
+                    analyzeBtn.innerHTML =
+                        "⏳ Analyzing...";
+
+                }
+
+            }
+        );
+
+
+        updateCounters();
+
+    </script>
+
+</body>
+
+</html>

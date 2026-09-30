@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Ranker</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+
+        /* HEADER */
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px 5%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+
+        .status {
+            background: #065f46;
+            color: #d1fae5;
+
+            padding: 8px 14px;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+
+        /* MAIN */
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+
+            margin: 35px auto;
+        }
+
+
+        .intro {
+            margin-bottom: 25px;
+        }
+
+
+        .intro h1 {
+            margin: 0 0 8px;
+
+            font-size: 30px;
+
+            color: #111827;
+        }
+
+
+        .intro p {
+            margin: 0;
+
+            color: #64748b;
+        }
+
+
+        /* CARD */
+
+        .card {
+            background: white;
+
+            padding: 28px;
+
+            border-radius: 14px;
+
+            margin-bottom: 30px;
+
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, 0.07);
+        }
+
+
+        .section-title {
+            font-size: 20px;
+
+            font-weight: 700;
+
+            margin-bottom: 18px;
+        }
+
+
+        /* UPLOAD */
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+
+            background: #f8fafc;
+
+            padding: 30px;
+
+            text-align: center;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .upload-icon {
+            font-size: 40px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .upload-box p {
+            color: #64748b;
+        }
+
+
+        .upload-box input {
+            margin-top: 10px;
+        }
+
+
+        /* FORM */
+
+        label {
+            display: block;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+        }
+
+
+        textarea {
+            width: 100%;
+
+            min-height: 210px;
+
+            padding: 15px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 10px;
+
+            resize: vertical;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 14px;
+
+            outline: none;
+        }
+
+
+        textarea:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.1);
+        }
+
+
+        .rank-button {
+            width: 100%;
+
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+
+        .rank-button:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* MESSAGE */
+
+        .message {
+            background: #fef2f2;
+
+            color: #b91c1c;
+
+            border: 1px solid #fecaca;
+
+            padding: 14px;
+
+            border-radius: 9px;
+
+            margin-bottom: 20px;
+
+            font-weight: 600;
+        }
+
+
+        /* RESULTS HEADER */
+
+        .results-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .results-title {
+            margin: 0;
+
+            font-size: 24px;
+        }
+
+
+        .results-count {
+            color: #64748b;
+
+            font-size: 14px;
+
+            margin-top: 5px;
+        }
+
+
+        .actions {
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .action-button {
+            display: inline-block;
+
+            border: none;
+
+            padding: 11px 16px;
+
+            border-radius: 8px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+
+        .history-button {
+            background: #475569;
+        }
+
+
+        .history-button:hover {
+            background: #334155;
+        }
+
+
+        .csv-button {
+            background: #059669;
+        }
+
+
+        .csv-button:hover {
+            background: #047857;
+        }
+
+
+        /* CANDIDATE */
+
+        .candidate-card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 24px;
+
+            margin-bottom: 18px;
+
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, 0.07);
+        }
+
+
+        .candidate-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            gap: 20px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .rank-number {
+            color: #64748b;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+
+        .candidate-name {
+            font-size: 19px;
+
+            font-weight: 700;
+
+            margin-top: 5px;
+
+            word-break: break-word;
+        }
+
+
+        .recommendation {
+            display: inline-block;
+
+            margin-top: 8px;
+
+            padding: 6px 10px;
+
+            border-radius: 20px;
+
+            background: #eff6ff;
+
+            color: #1d4ed8;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+
+        .score {
+            text-align: right;
+        }
+
+
+        .score-number {
+            font-size: 32px;
+
+            font-weight: 800;
+
+            color: #2563eb;
+        }
+
+
+        .score-label {
+            color: #64748b;
+
+            font-size: 12px;
+        }
+
+
+        /* SCORE GRID */
+
+        .score-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .score-box {
+            background: #f8fafc;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 9px;
+
+            padding: 14px;
+        }
+
+
+        .score-box-title {
+            color: #64748b;
+
+            font-size: 12px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .score-box-value {
+            font-size: 19px;
+
+            font-weight: 800;
+
+            color: #111827;
+        }
+
+
+        /* SKILLS */
+
+        .skills-section {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .skills-box {
+            border: 1px solid #e2e8f0;
+
+            border-radius: 9px;
+
+            padding: 15px;
+        }
+
+
+        .skills-title {
+            font-weight: 700;
+
+            font-size: 13px;
+
+            margin-bottom: 9px;
+        }
+
+
+        .matching-title {
+            color: #047857;
+        }
+
+
+        .missing-title {
+            color: #b91c1c;
+        }
+
+
+        .skill-badge {
+            display: inline-block;
+
+            padding: 6px 9px;
+
+            margin: 3px;
+
+            border-radius: 6px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+
+        .matching-skill {
+            background: #ecfdf5;
+
+            color: #047857;
+        }
+
+
+        .missing-skill {
+            background: #fef2f2;
+
+            color: #b91c1c;
+        }
+
+
+        .no-skills {
+            color: #94a3b8;
+
+            font-size: 13px;
+        }
+
+
+        /* DETAILS BUTTON */
+
+        .details-button {
+            width: 100%;
+
+            padding: 11px;
+
+            border: 1px solid #cbd5e1;
+
+            background: white;
+
+            color: #334155;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            font-size: 14px;
+        }
+
+
+        .details-button:hover {
+            background: #f8fafc;
+        }
+
+
+        /* DETAILS */
+
+        .candidate-details {
+            display: none;
+
+            margin-top: 18px;
+
+            border-top: 1px solid #e2e8f0;
+
+            padding-top: 20px;
+        }
+
+
+        .candidate-details.active {
+            display: block;
+        }
+
+
+        .details-heading {
+            font-size: 17px;
+
+            font-weight: 700;
+
+            margin-bottom: 12px;
+        }
+
+
+        .details-summary {
+            background: #f8fafc;
+
+            border-radius: 9px;
+
+            padding: 16px;
+
+            line-height: 1.6;
+
+            color: #475569;
+
+            font-size: 14px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .details-grid {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+        }
+
+
+        .detail-box {
+            background: #f8fafc;
+
+            padding: 15px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            color: #64748b;
+        }
+
+
+        .detail-box strong {
+            color: #334155;
+
+            display: block;
+
+            margin-bottom: 6px;
+        }
+
+
+        /* FOOTER */
+
+        .footer {
+            text-align: center;
+
+            padding: 30px;
+
+            color: #94a3b8;
+
+            font-size: 13px;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 800px) {
+
+            .score-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .skills-section {
+                grid-template-columns: 1fr;
+            }
+
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            .candidate-top {
+                flex-direction: column;
+            }
+
+
+            .score {
+                text-align: left;
+            }
+
+
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .status {
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ======================================================
+     HEADER
+====================================================== -->
+
+<header class="header">
+
+    <div class="brand">
+        AI <span>Resume Ranker</span>
+    </div>
+
+
+    <div class="status">
+        ● AI Ranking System Active
+    </div>
+
+</header>
+
+
+
+<!-- ======================================================
+     MAIN
+====================================================== -->
+
+<main class="container">
+
+
+    <div class="intro">
+
+        <h1>
+            Recruiter Dashboard
+        </h1>
+
+        <p>
+            Upload multiple resumes and use AI
+            to identify relevant candidates.
+        </p>
+
+    </div>
+
+
+
+    <!-- MESSAGE -->
+
+    {% if message %}
+
+        <div class="message">
+            {{ message }}
+        </div>
+
+    {% endif %}
+
+
+
+    <!-- ==================================================
+         UPLOAD CARD
+    ================================================== -->
+
+    <div class="card">
+
+        <div class="section-title">
+            Screen Candidates
+        </div>
+
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+
+            <div class="upload-box">
+
+                <div class="upload-icon">
+                    📄
+                </div>
+
+
+                <strong>
+                    Upload Candidate Resumes
+                </strong>
+
+
+                <p>
+                    PDF files only
+                </p>
+
+
+                <input
+                    type="file"
+                    name="resumes"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    required
+                >
+
+            </div>
+
+
+
+            <label for="job_description">
+                Job Description
+            </label>
+
+
+            <textarea
+                id="job_description"
+                name="job_description"
+                placeholder="Paste the complete job description here..."
+                required
+            ></textarea>
+
+
+            <button
+                type="submit"
+                class="rank-button"
+            >
+                🚀 Rank Resumes
+            </button>
+
+
+        </form>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         RESULTS
+    ================================================== -->
+
+    {% if results %}
+
+
+        <div class="results-header">
+
+
+            <div>
+
+                <h2 class="results-title">
+                    Ranking Results
+                </h2>
+
+
+                <div class="results-count">
+
+                    {{ results|length }}
+                    candidate(s) analyzed
+
+                </div>
+
+            </div>
+
+
+
+            <div class="actions">
+
+
+                <!-- HISTORY -->
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="action-button history-button"
+                >
+                    📋 History
+                </a>
+
+
+
+                <!-- CSV -->
+
+                <form
+                    method="POST"
+                    action="{{ url_for('export_csv') }}"
+                    style="display:inline;"
+                >
+
+                    <input
+                        type="hidden"
+                        name="results_json"
+                        value="{{ results|tojson|forceescape }}"
+                    >
+
+
+                    <button
+                        type="submit"
+                        class="action-button csv-button"
+                    >
+                        📥 Download CSV
+                    </button>
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             CANDIDATES
+        ================================================== -->
+
+        {% for result in results %}
+
+
+            <div class="candidate-card">
+
+
+                <!-- TOP -->
+
+                <div class="candidate-top">
+
+
+                    <div>
+
+                        <div class="rank-number">
+                            RANK #{{ loop.index }}
+                        </div>
+
+
+                        <div class="candidate-name">
+                            {{ result.filename }}
+                        </div>
+
+
+                        <div class="recommendation">
+                            {{ result.recommendation }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="score">
+
+                        <div class="score-number">
+                            {{ "%.2f"|format(result.score) }}%
+                        </div>
+
+
+                        <div class="score-label">
+                            Overall Match
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- SCORE BREAKDOWN -->
+
+                <div class="score-grid">
+
+
+                    <div class="score-box">
+
+                        <div class="score-box-title">
+                            Skill Match
+                        </div>
+
+                        <div class="score-box-value">
+                            {{ "%.2f"|format(result.skill_score) }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="score-box">
+
+                        <div class="score-box-title">
+                            AI Relevance
+                        </div>
+
+                        <div class="score-box-value">
+                            {{ "%.2f"|format(result.text_score) }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="score-box">
+
+                        <div class="score-box-title">
+                            Job Title Match
+                        </div>
+
+                        <div class="score-box-value">
+                            {{ "%.2f"|format(result.title_score) }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="score-box">
+
+                        <div class="score-box-title">
+                            Experience Match
+                        </div>
+
+                        <div class="score-box-value">
+                            {{ "%.2f"|format(result.experience_score) }}%
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- SKILLS -->
+
+                <div class="skills-section">
+
+
+                    <div class="skills-box">
+
+                        <div class="skills-title matching-title">
+                            ✓ Matching Skills
+                        </div>
+
+
+                        {% if result.matching_skills %}
+
+                            {% for skill in result.matching_skills %}
+
+                                <span class="skill-badge matching-skill">
+                                    {{ skill }}
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="no-skills">
+                                No matching skills found.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <div class="skills-box">
+
+                        <div class="skills-title missing-title">
+                            ✕ Missing Skills
+                        </div>
+
+
+                        {% if result.missing_skills %}
+
+                            {% for skill in result.missing_skills %}
+
+                                <span class="skill-badge missing-skill">
+                                    {{ skill }}
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <span class="no-skills">
+                                No major missing skills.
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- DETAILS BUTTON -->
+
+                <button
+                    type="button"
+                    class="details-button"
+                    onclick="toggleDetails(this)"
+                >
+                    View Details ▼
+                </button>
+
+
+
+                <!-- DETAILS -->
+
+                <div class="candidate-details">
+
+
+                    <div class="details-heading">
+                        Detailed Candidate Analysis
+                    </div>
+
+
+
+                    <div class="details-summary">
+
+                        <strong>
+                            Screening Summary
+                        </strong>
+
+                        <br><br>
+
+                        This candidate received an overall
+                        match score of
+
+                        <strong>
+                            {{ "%.2f"|format(result.score) }}%
+                        </strong>
+
+                        based on the current ranking criteria.
+
+                        The screening recommendation is
+
+                        <strong>
+                            {{ result.recommendation }}
+                        </strong>.
+
+                    </div>
+
+
+
+                    <div class="details-grid">
+
+
+                        <div class="detail-box">
+
+                            <strong>
+                                Skills Found
+                            </strong>
+
+
+                            {% if result.resume_skills %}
+
+                                {{ result.resume_skills|join(", ") }}
+
+                            {% else %}
+
+                                None detected.
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <div class="detail-box">
+
+                            <strong>
+                                Required Skills
+                            </strong>
+
+
+                            {% if result.job_skills %}
+
+                                {{ result.job_skills|join(", ") }}
+
+                            {% else %}
+
+                                None detected.
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <div class="detail-box">
+
+                            <strong>
+                                Matching Skills
+                            </strong>
+
+
+                            {% if result.matching_skills %}
+
+                                {{ result.matching_skills|join(", ") }}
+
+                            {% else %}
+
+                                None
+
+                            {% endif %}
+
+                        </div>
+
+
+
+                        <div class="detail-box">
+
+                            <strong>
+                                Missing Skills
+                            </strong>
+
+
+                            {% if result.missing_skills %}
+
+                                {{ result.missing_skills|join(", ") }}
+
+                            {% else %}
+
+                                None
+
+                            {% endif %}
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <br>
+
+
+                    <div class="details-summary">
+
+                        <strong>
+                            Screening Recommendation
+                        </strong>
+
+                        <br><br>
+
+                        {{ result.recommendation }}
+
+                        <br><br>
+
+                        Recruiters should review the original
+                        resume and job requirements before making
+                        a hiring decision.
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+    {% endif %}
+
+
+</main>
+
+
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+    AI Resume Ranker · Intelligent Resume Screening System
+
+</footer>
+
+
+
+<!-- ======================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+
+function toggleDetails(button) {
+
+    const card =
+        button.closest(".candidate-card");
+
+
+    const details =
+        card.querySelector(".candidate-details");
+
+
+    if (
+        details.classList.contains("active")
+    ) {
+
+        details.classList.remove("active");
+
+        button.innerHTML =
+            "View Details ▼";
+
+    }
+
+    else {
+
+        details.classList.add("active");
+
+        button.innerHTML =
+            "Hide Details ▲";
+
+    }
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Saved Ranking - AI Resume Ranker</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .job-box {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .job-description {
+            color: #4b5563;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .back-button {
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .back-button:hover {
+            background: #1d4ed8;
+        }
+
+        .candidate-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 18px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .rank {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 6px;
+        }
+
+        .filename {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .score {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .recommendation {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .score-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 7px;
+        }
+
+        .score-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .skills-section {
+            margin-top: 22px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill {
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .matching {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .missing {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .found {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .required {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .summary {
+            margin-top: 22px;
+            padding: 18px;
+            background: #f8fafc;
+            border-radius: 10px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .empty-box {
+            background: white;
+            padding: 45px;
+            text-align: center;
+            border-radius: 14px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+
+            .score-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .candidate-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .top-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div class="brand">
+                🤖 AI Resume Ranker
+            </div>
+
+            <div class="subtitle">
+                Saved Recruitment Ranking
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <div class="top-section">
+
+            <div>
+
+                <h1>
+                    Ranking Session #{{ session["id"] }}
+                </h1>
+
+                <p>
+                    Created on {{ session["created_at"] }}
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('history') }}"
+                class="back-button"
+            >
+                ← Back to History
+            </a>
+
+        </div>
+
+
+        <div class="job-box">
+
+            <div class="job-title">
+                📄 Job Description
+            </div>
+
+            <div class="job-description">
+                {{ session["job_description"] }}
+            </div>
+
+        </div>
+
+
+        {% if results %}
+
+            {% for result in results %}
+
+                <div class="candidate-card">
+
+
+                    <div class="candidate-header">
+
+                        <div>
+
+                            <div class="rank">
+                                RANK #{{ loop.index }}
+                            </div>
+
+                            <div class="filename">
+                                📄 {{ result["filename"] }}
+                            </div>
+
+                            <div class="recommendation">
+                                {{ result["recommendation"] }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="score">
+                            {{ "%.2f"|format(result["score"]) }}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-grid">
+
+
+                        <div class="score-box">
+
+                            <div class="score-label">
+                                Skill Match
+                            </div>
+
+                            <div class="score-value">
+                                {{ "%.2f"|format(result["skill_score"]) }}%
+                            </div>
+
+                        </div>
+
+
+                        <div class="score-box">
+
+                            <div class="score-label">
+                                AI Relevance
+                            </div>
+
+                            <div class="score-value">
+                                {{ "%.2f"|format(result["text_score"]) }}%
+                            </div>
+
+                        </div>
+
+
+                        <div class="score-box">
+
+                            <div class="score-label">
+                                Job Title Match
+                            </div>
+
+                            <div class="score-value">
+                                {{ "%.2f"|format(result["title_score"]) }}%
+                            </div>
+
+                        </div>
+
+
+                        <div class="score-box">
+
+                            <div class="score-label">
+                                Experience Match
+                            </div>
+
+                            <div class="score-value">
+                                {{ "%.2f"|format(result["experience_score"]) }}%
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="skills-section">
+
+                        <div class="section-title">
+                            ✅ Matching Skills
+                        </div>
+
+                        <div class="skill-list">
+
+                            {% if result["matching_skills"] %}
+
+                                {% for skill in result["matching_skills"] %}
+
+                                    <span class="skill matching">
+                                        {{ skill }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="skill missing">
+                                    No matching skills
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="skills-section">
+
+                        <div class="section-title">
+                            ❌ Missing Skills
+                        </div>
+
+                        <div class="skill-list">
+
+                            {% if result["missing_skills"] %}
+
+                                {% for skill in result["missing_skills"] %}
+
+                                    <span class="skill missing">
+                                        {{ skill }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="skill matching">
+                                    No missing skills
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="skills-section">
+
+                        <div class="section-title">
+                            🔎 Skills Found in Resume
+                        </div>
+
+                        <div class="skill-list">
+
+                            {% for skill in result["resume_skills"] %}
+
+                                <span class="skill found">
+                                    {{ skill }}
+                                </span>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="skills-section">
+
+                        <div class="section-title">
+                            📋 Skills Required by Job
+                        </div>
+
+                        <div class="skill-list">
+
+                            {% for skill in result["job_skills"] %}
+
+                                <span class="skill required">
+                                    {{ skill }}
+                                </span>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary">
+
+                        <strong>Screening Summary:</strong>
+
+                        This candidate received an overall match
+                        score of
+                        <strong>
+                            {{ "%.2f"|format(result["score"]) }}%
+                        </strong>.
+
+                        The score combines skill matching,
+                        AI-based text relevance,
+                        job-title relevance, and experience
+                        matching.
+
+                    </div>
+
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <div class="empty-box">
+
+                <h2>
+                    No candidate results found.
+                </h2>
+
+                <p>
+                    This ranking session does not contain
+                    any saved candidate results.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+    </main>
+
+
+    <footer>
+
+        AI Resume Ranker • Recruitment Intelligence System
+
+    </footer>
+
+
+</body>
+
+</html>

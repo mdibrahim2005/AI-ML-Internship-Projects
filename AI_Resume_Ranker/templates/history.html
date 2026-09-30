@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ranking History - AI Resume Ranker</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .back-button {
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: #1d4ed8;
+        }
+
+        .empty-box {
+            background: white;
+            border-radius: 14px;
+            padding: 50px 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .empty-icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .empty-box h2 {
+            margin: 10px 0;
+        }
+
+        .empty-box p {
+            color: #6b7280;
+        }
+
+        .session-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .session-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .session-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .session-date {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .session-info {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .view-button {
+            background: #111827;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .view-button:hover {
+            background: #374151;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+
+            .header {
+                padding: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .top-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .session-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .view-button {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <div>
+
+                <div class="brand">
+                    🤖 AI Resume Ranker
+                </div>
+
+                <div class="subtitle">
+                    Recruitment Intelligence Dashboard
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="top-section">
+
+            <div>
+
+                <h1>📋 Ranking History</h1>
+
+                <p>
+                    View your previous resume ranking sessions.
+                </p>
+
+            </div>
+
+            <a
+                href="{{ url_for('home') }}"
+                class="back-button"
+            >
+                ← Back to Ranker
+            </a>
+
+        </div>
+
+
+        {% if sessions %}
+
+            {% for session in sessions %}
+
+                <div class="session-card">
+
+                    <div class="session-top">
+
+                        <div>
+
+                            <div class="session-title">
+                                Ranking Session #{{ session["id"] }}
+                            </div>
+
+                            <div class="session-date">
+                                Created:
+                                {{ session["created_at"] }}
+                            </div>
+
+                        </div>
+
+
+                        <a
+                            href="{{ url_for('view_session', session_id=session['id']) }}"
+                            class="view-button"
+                        >
+                            View Results →
+                        </a>
+
+                    </div>
+
+
+                    <div class="session-info">
+
+                        <div class="info-badge">
+                            👥
+                            {{ session["candidate_count"] }}
+                            Candidates
+                        </div>
+
+                        <div class="info-badge">
+                            📅
+                            {{ session["created_at"] }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <div class="empty-box">
+
+                <div class="empty-icon">
+                    📂
+                </div>
+
+                <h2>
+                    No ranking history yet
+                </h2>
+
+                <p>
+                    Once you rank resumes, your previous
+                    ranking sessions will appear here.
+                </p>
+
+                <br>
+
+                <a
+                    href="{{ url_for('home') }}"
+                    class="back-button"
+                >
+                    Start Ranking Resumes
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+
+    <footer>
+
+        AI Resume Ranker • Recruitment Intelligence System
+
+    </footer>
+
+
+</body>
+
+</html>
